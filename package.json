@@ -1,0 +1,19 @@
+{
+  "name": "rfid-nodejs-backend",
+  "version": "1.0.0",
+  "description": "A simple Node.js backend for communicating with Wemos D1 R1 and MFRC522 RFID reader.",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "open": "^8.4.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "author": "",
+  "license": "ISC"
+}
