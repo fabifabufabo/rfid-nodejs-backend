@@ -67,7 +67,7 @@ class RFIDController {
             );
         }
     }
-    
+
     async createUser(req, res) {
         try {
             const { uid, name, spotifyPlaylist } = req.body;
@@ -95,7 +95,7 @@ class RFIDController {
             };
 
             usersData.users.push(newUser);
-            this.users.push(newUser); 
+            this.users.push(newUser);
 
             fs.writeFileSync(this.usersFilePath, JSON.stringify(usersData, null, 2), 'utf8');
 
@@ -134,6 +134,44 @@ class RFIDController {
 
         } catch (error) {
             console.error('Erro ao deletar usuário:', error);
+            return res.status(500).json(
+                responseHelper.createResponse('error', 'Erro interno do servidor')
+            );
+        }
+    }
+
+    async updateUser(req, res) {
+        try {
+            const uidToUpdate = req.params.uid.replace(/\s+/g, '').toUpperCase();
+            const { name, spotifyPlaylist } = req.body;
+
+            if (!name && !spotifyPlaylist) {
+                return res.status(400).json(
+                    responseHelper.createResponse('error', 'Pelo menos um campo (name ou spotifyPlaylist) é necessário para a atualização')
+                );
+            }
+
+            const userIndex = this.users.findIndex(user => user.uid === uidToUpdate);
+
+            if (userIndex === -1) {
+                return res.status(404).json(
+                    responseHelper.createResponse('error', 'Usuário não encontrado')
+                );
+            }
+
+            // Update user fields
+            if (name) this.users[userIndex].name = name;
+            if (spotifyPlaylist) this.users[userIndex].spotifyPlaylist = spotifyPlaylist;
+
+            const usersData = { users: this.users };
+            fs.writeFileSync(this.usersFilePath, JSON.stringify(usersData, null, 2), 'utf8');
+
+            return res.json(
+                responseHelper.createResponse('success', 'Usuário atualizado com sucesso', this.users[userIndex])
+            );
+
+        } catch (error) {
+            console.error('Erro ao atualizar usuário:', error);
             return res.status(500).json(
                 responseHelper.createResponse('error', 'Erro interno do servidor')
             );
