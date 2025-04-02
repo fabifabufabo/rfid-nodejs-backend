@@ -67,6 +67,78 @@ class RFIDController {
             );
         }
     }
+    
+    async createUser(req, res) {
+        try {
+            const { uid, name, spotifyPlaylist } = req.body;
+
+            if (!uid || !name || !spotifyPlaylist) {
+                return res.status(400).json(
+                    responseHelper.createResponse('error', 'Faltam campos obrigatórios (uid, name, spotifyPlaylist)')
+                );
+            }
+
+            const normalizedUID = uid.replace(/\s+/g, '').toUpperCase();
+
+            if (this.findUserByUID(normalizedUID)) {
+                return res.status(409).json(
+                    responseHelper.createResponse('error', 'Usuário com este UID já existe')
+                );
+            }
+
+            const usersData = JSON.parse(fs.readFileSync(this.usersFilePath, 'utf8'));
+
+            const newUser = {
+                uid: normalizedUID,
+                name,
+                spotifyPlaylist
+            };
+
+            usersData.users.push(newUser);
+            this.users.push(newUser); 
+
+            fs.writeFileSync(this.usersFilePath, JSON.stringify(usersData, null, 2), 'utf8');
+
+            return res.status(201).json(
+                responseHelper.createResponse('success', 'Usuário criado com sucesso', newUser)
+            );
+
+        } catch (error) {
+            console.error('Erro ao criar usuário:', error);
+            return res.status(500).json(
+                responseHelper.createResponse('error', 'Erro interno do servidor')
+            );
+        }
+    }
+
+    async deleteUser(req, res) {
+        try {
+            const uid = req.params.uid.replace(/\s+/g, '').toUpperCase();
+
+            const userIndex = this.users.findIndex(user => user.uid === uid);
+
+            if (userIndex === -1) {
+                return res.status(404).json(
+                    responseHelper.createResponse('error', 'Usuário não encontrado')
+                );
+            }
+
+            this.users.splice(userIndex, 1);
+
+            const usersData = { users: this.users };
+            fs.writeFileSync(this.usersFilePath, JSON.stringify(usersData, null, 2), 'utf8');
+
+            return res.status(200).json(
+                responseHelper.createResponse('success', 'Usuário deletado com sucesso')
+            );
+
+        } catch (error) {
+            console.error('Erro ao deletar usuário:', error);
+            return res.status(500).json(
+                responseHelper.createResponse('error', 'Erro interno do servidor')
+            );
+        }
+    }
 }
 
 module.exports = RFIDController;
