@@ -38,23 +38,30 @@ class RFIDController {
 
         if (user) {
             // Create the response message
-            const message = `Abrindo a playlist de ${user.name}`;
+            const message = `Abrindo a música/playlist de ${user.name}`;
 
-            // If there's a Spotify playlist, open it in the Spotify app or browser
-            if (user.spotifyPlaylist) {
+            // If there's a Spotify link, open it in the Spotify app or browser
+            if (user.spotifyLink) {
                 try {
                     // Convert HTTP URL to Spotify URI if it's a web URL
-                    let spotifyUri = user.spotifyPlaylist;
-                    if (spotifyUri.startsWith('https://open.spotify.com/playlist/')) {
-                        const playlistId = spotifyUri.split('/').pop().split('?')[0];
-                        spotifyUri = `spotify:playlist:${playlistId}`;
+                    let spotifyUri = user.spotifyLink;
+                    if (spotifyUri.startsWith('https://open.spotify.com/')) {
+                        // Extract the type and ID from the URL
+                        const urlParts = spotifyUri.split('/');
+                        const resourceIndex = urlParts.indexOf('open.spotify.com') + 1;
+
+                        if (resourceIndex < urlParts.length - 1) {
+                            const resourceType = urlParts[resourceIndex];  // playlist, track, album, etc.
+                            const resourceId = urlParts[resourceIndex + 1].split('?')[0]; // Remove query params
+                            spotifyUri = `spotify:${resourceType}:${resourceId}`;
+                        }
                     }
 
                     // Open the URI - this will open in Spotify app if installed, otherwise in browser
                     await open(spotifyUri);
-                    console.log(`Opening Spotify playlist for ${user.name}`);
+                    console.log(`Opening Spotify resource for ${user.name}: ${spotifyUri}`);
                 } catch (error) {
-                    console.error('Error opening Spotify playlist:', error);
+                    console.error('Error opening Spotify resource:', error);
                 }
             }
 
@@ -70,11 +77,11 @@ class RFIDController {
 
     async createUser(req, res) {
         try {
-            const { uid, name, spotifyPlaylist } = req.body;
+            const { uid, name, spotifyLink } = req.body;
 
-            if (!uid || !name || !spotifyPlaylist) {
+            if (!uid || !name || !spotifyLink) {
                 return res.status(400).json(
-                    responseHelper.createResponse('error', 'Faltam campos obrigatórios (uid, name, spotifyPlaylist)')
+                    responseHelper.createResponse('error', 'Faltam campos obrigatórios (uid, name, spotifyLink)')
                 );
             }
 
@@ -91,7 +98,7 @@ class RFIDController {
             const newUser = {
                 uid: normalizedUID,
                 name,
-                spotifyPlaylist
+                spotifyLink
             };
 
             usersData.users.push(newUser);
@@ -143,11 +150,11 @@ class RFIDController {
     async updateUser(req, res) {
         try {
             const uidToUpdate = req.params.uid.replace(/\s+/g, '').toUpperCase();
-            const { name, spotifyPlaylist } = req.body;
+            const { name, spotifyLink } = req.body;
 
-            if (!name && !spotifyPlaylist) {
+            if (!name && !spotifyLink) {
                 return res.status(400).json(
-                    responseHelper.createResponse('error', 'Pelo menos um campo (name ou spotifyPlaylist) é necessário para a atualização')
+                    responseHelper.createResponse('error', 'Pelo menos um campo (name ou spotifyLink) é necessário para a atualização')
                 );
             }
 
@@ -161,7 +168,7 @@ class RFIDController {
 
             // Update user fields
             if (name) this.users[userIndex].name = name;
-            if (spotifyPlaylist) this.users[userIndex].spotifyPlaylist = spotifyPlaylist;
+            if (spotifyLink) this.users[userIndex].spotifyLink = spotifyLink;
 
             const usersData = { users: this.users };
             fs.writeFileSync(this.usersFilePath, JSON.stringify(usersData, null, 2), 'utf8');
