@@ -71,6 +71,16 @@ The backend exposes routes for RFID operations. You can send requests to these r
 
 ### User Management
 
+- GET `/rfid/users`
+
+  - Description: Retrieves a list of all registered users
+  - Success Response:
+    - Status: 200 OK
+    - Content: `{ "status": "success", "message": "Lista de usuários recuperada com sucesso", "data": [array of user objects] }`
+  - Error Response:
+    - Status: 500 Internal Server Error
+    - Content: `{ "status": "error", "message": "Erro interno do servidor" }`
+
 - POST `/rfid/users`
 
   - Description: Creates a new user with the specified RFID UID, name, and Spotify link

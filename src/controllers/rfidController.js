@@ -184,6 +184,19 @@ class RFIDController {
             );
         }
     }
+
+    async getAllUsers(req, res) {
+        try {
+            return res.json(
+                responseHelper.createResponse('success', 'Lista de usuários recuperada com sucesso', this.users)
+            );
+        } catch (error) {
+            console.error('Erro ao recuperar usuários:', error);
+            return res.status(500).json(
+                responseHelper.createResponse('error', 'Erro interno do servidor')
+            );
+        }
+    }
 }
 
 module.exports = RFIDController;
