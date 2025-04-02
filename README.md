@@ -36,8 +36,8 @@ rfid-nodejs-backend
 2. **Install dependencies:**
 
    ```
-   npm install
-   ```
+   node --version
+   npm --version   ```
 
 3. **Configure environment variables:**
    Copy the `.env.example` file to `.env` and update the values as needed.
