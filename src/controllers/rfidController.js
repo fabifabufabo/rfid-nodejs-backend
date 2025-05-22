@@ -222,3 +222,4 @@ class RFIDController {
 }
 
 module.exports = RFIDController;
+
