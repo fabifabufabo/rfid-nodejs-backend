@@ -7,7 +7,7 @@ This project is a simple Node.js backend that communicates with the Wemos D1 R1 
 ```
 rfid-nodejs-backend
 ├── data
-│   └── users.json         # Legacy user data (used for migration)
+│   └── users.json         # Legacy user data
 ├── src
 │   ├── app.js             # Entry point of the application
 │   ├── config
