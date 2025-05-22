@@ -67,12 +67,6 @@ rfid-nodejs-backend
    npm run dev
    ```
 
-6. **Migrate existing data (optional):**
-   If you have existing user data in `data/users.json`, you can migrate it to MongoDB:
-   ```
-   npm run migrate
-   ```
-
 ## Usage
 
 The backend exposes routes for RFID operations. You can send requests to these routes from the Wemos D1 R1 to interact with the RFID reader or from any other client to manage users.
@@ -183,13 +177,3 @@ The `users` collection has the following schema:
   spotifyLink: String // Spotify link or URI
 }
 ```
-
-### Data Migration
-
-The application includes a migration script to transfer existing data from the JSON file to MongoDB. Run it with:
-
-```
-npm run migrate
-```
-
-This will read the data from `data/users.json` and insert it into the MongoDB database. If there are existing records in the database, the script will ask for confirmation before overwriting them.
