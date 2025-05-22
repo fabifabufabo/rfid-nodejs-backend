@@ -1,27 +1,31 @@
-# RFID Node.js Backend
+# RFID Node.js Backend with MongoDB
 
-This project is a simple Node.js backend that communicates with the Wemos D1 R1 (Wi-Fi ESP8266) and the MFRC522 RFID reader. It provides a single route for handling RFID operations.
+This project is a simple Node.js backend that communicates with the Wemos D1 R1 (Wi-Fi ESP8266) and the MFRC522 RFID reader. It provides routes for handling RFID operations and stores data in MongoDB.
 
 ## Project Structure
 
 ```
 rfid-nodejs-backend
 ├── data
-│   └── users.json         # User registration data with Spotify links
+│   └── users.json         # Legacy user data (used for migration)
 ├── src
-│   ├── app.js               # Entry point of the application
+│   ├── app.js             # Entry point of the application
+│   ├── config
+│   │   └── db.js          # MongoDB connection configuration
 │   ├── routes
-│   │   └── rfid.js          # Route for RFID operations
+│   │   └── rfid.js        # Routes for RFID operations
 │   ├── controllers
 │   │   └── rfidController.js # Controller for handling RFID requests
 │   ├── middleware
-│   │   └── logger.js        # Middleware for logging requests
+│   │   └── logger.js      # Middleware for logging requests
+│   ├── models
+│   │   └── User.js        # MongoDB User model
 │   └── utils
 │       └── responseHelper.js # Utility functions for response formatting
-├── package.json              # npm configuration file
-├── .env.example              # Example environment variables
-├── .gitignore                # Files and directories to ignore by Git
-└── README.md                 # Project documentation
+├── package.json           # npm configuration file
+├── .env                   # Environment variables (MongoDB connection, etc.)
+├── .gitignore             # Files and directories to ignore by Git
+└── README.md              # Project documentation
 ```
 
 ## Setup Instructions
@@ -40,11 +44,33 @@ rfid-nodejs-backend
    ```
 
 3. **Configure environment variables:**
-   Copy the `.env.example` file to `.env` and update the values as needed.
+   Create a `.env` file in the root directory with the following content:
+   
+   ```
+   PORT=3000
+   MONGODB_URI=mongodb://localhost:27017/rfid-spotify
+   ```
+   
+   Note: Adjust the MongoDB URI according to your MongoDB setup. If you're using MongoDB Atlas,
+   use the connection string provided by Atlas.
 
-4. **Run the application:**
+4. **Ensure MongoDB is running:**
+   Make sure you have MongoDB installed and running on your system, or have access to a MongoDB instance.
+
+5. **Run the application:**
    ```
    npm start
+   ```
+   
+   For development with auto-restart:
+   ```
+   npm run dev
+   ```
+
+6. **Migrate existing data (optional):**
+   If you have existing user data in `data/users.json`, you can migrate it to MongoDB:
+   ```
+   npm run migrate
    ```
 
 ## Usage
@@ -139,3 +165,31 @@ The backend exposes routes for RFID operations. You can send requests to these r
 ## License
 
 This project is licensed under the MIT License.
+
+## MongoDB Integration
+
+This application uses MongoDB to store user data in the `rfid-spotify` database. The following collections are used:
+
+- `users`: Stores user information with RFID UIDs and Spotify links
+
+### Database Schema
+
+The `users` collection has the following schema:
+
+```javascript
+{
+  uid: String,      // RFID card UID (normalized to uppercase with no spaces)
+  name: String,     // User name
+  spotifyLink: String // Spotify link or URI
+}
+```
+
+### Data Migration
+
+The application includes a migration script to transfer existing data from the JSON file to MongoDB. Run it with:
+
+```
+npm run migrate
+```
+
+This will read the data from `data/users.json` and insert it into the MongoDB database. If there are existing records in the database, the script will ask for confirmation before overwriting them.
